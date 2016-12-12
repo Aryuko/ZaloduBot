@@ -1,0 +1,2 @@
+# ZaloduBot
+discord.js bot
