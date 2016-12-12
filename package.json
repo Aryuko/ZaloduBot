@@ -1,0 +1,22 @@
+{
+  "name": "zalodubot",
+  "version": "1.0.0",
+  "description": "discord.js bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zalodu/ZaloduBot.git"
+  },
+  "author": "Zalodu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Zalodu/ZaloduBot/issues"
+  },
+  "homepage": "https://github.com/Zalodu/ZaloduBot#readme",
+  "dependencies": {
+    "discord.js": "^10.0.1"
+  }
+}
