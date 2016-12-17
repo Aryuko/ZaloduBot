@@ -26,13 +26,12 @@ bot.login(authentication.bot_token);
 
 bot.on("ready", function () {
   var guildsArray = bot.guilds.array();
-
   console.log("Bot is alive! Serving " + guildsArray.length + " servers.");
-
-  Stats.initGuildStats(guildsArray);
 
   bot.user.setStatus("online");
   bot.user.setGame(":D");
+
+  Stats.initGuildStats(guildsArray);
 });
 
 bot.on("disconnected", function () {
@@ -42,7 +41,7 @@ bot.on("disconnected", function () {
 
 
 bot.on("message", function (message) {
-  if(message.author != bot.user) {
+  if(!message.author.bot) {
     Stats.incrementCount(message);
   }
 });
