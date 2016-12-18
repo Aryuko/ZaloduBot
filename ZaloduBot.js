@@ -44,8 +44,27 @@ bot.on("message", function (message) {
   if(!message.author.bot) {
     Stats.incrementCount(message);
   }
+
+  /* for debugging renaming */
+  if(message.content == "rename") {
+    var oldUser = message.author;
+    var newUser = message.author;
+    newUser.username = "Zalodu2";
+
+    message.channel.sendMessage("rename triggered");
+    Stats.userUpdate(oldUser, newUser, bot.guilds.array());
+  }
 });
 
 bot.on("channelCreate", function (channel) {
-  Stats.addNewChannel(channel);
+  Stats.channelCreate(channel);
+});
+
+bot.on("channelUpdate", function (oldChannel, newChannel) {
+  Stats.channelUpdate(oldChannel, newChannel);
+});
+
+
+bot.on("userUpdate", function (oldUser, newUser) {
+  Stats.userUpdate(oldUser, newUser, bot.guilds.array());
 });

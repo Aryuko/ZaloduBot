@@ -25,33 +25,60 @@ var self = module.exports = {
   //check if there's an entry for each server, if
   initGuildStats: function (guildsArray) {
     self.loadStats();
-    if(!stats.hasOwnProperty("guilds")) {
+    if (!stats.hasOwnProperty("guilds")) {
       stats = {"guilds" : {}};
     }
 
     for (var i = 0; i < guildsArray.length; i++) {
-      if(!stats.guilds.hasOwnProperty(guildsArray[i].name)) {
-        stats.guilds[guildsArray[i].name] = {"channels" : {}};
+      if (!stats.guilds.hasOwnProperty(guildsArray[i].id)) {
+        stats.guilds[guildsArray[i].id] = {"name": guildsArray[i].name, "channels": {}};
       }
       var channelsArray = guildsArray[i].channels.array();
       for (var j = 0; j < channelsArray.length; j++) {
-        if(channelsArray[j].type == "text") {
-          stats.guilds[guildsArray[i].name].channels[channelsArray[j].id] = {"name": channelsArray[j].name, "messageCount": 0};
+        if (channelsArray[j].type == "text") {
+          stats.guilds[guildsArray[i].id].channels[channelsArray[j].id] = {"name": channelsArray[j].name, "users": {}};
         }
       }
     }
     self.saveStats();
   },
 
-  addNewChannel: function (channel) {
-    console.log("New channel created on " + channel.guild.name + " server: " + channel.name);
-    stats.guilds[channel.guild.name].channels[channel.id] = {"name": channel.name, "messageCount": 0}
+  channelCreate: function (channel) {
+    console.log("New channel \"" + channel.name + "\" created on server \"" + channel.guild.name + "\"");
+    stats.guilds[channel.guild.id].channels[channel.id] = {"name": channel.name, "users": {}}
     self.saveStats();
+  },
+
+  channelUpdate: function (oldChannel, newChannel) {
+    if (oldChannel.name != newChannel.name) {
+      console.log("Channel \"" + oldChannel.name + "\" on server \"" + oldChannel.guild.name + "\" renamed to \"" + newChannel.name + "\"");
+      stats.guilds[oldChannel.guild.id].channels[oldChannel.id].name = newChannel.name;
+      self.saveStats();
+    }
   },
 
   incrementCount: function (message) {
     messageCounter++;
-    stats.guilds[message.guild.name].channels[message.channel.id].messageCount++;
+    /* if there's no record for the user for the channel, add a record*/
+    if (!stats.guilds[message.guild.id].channels[message.channel.id].users.hasOwnProperty(message.author.id)) {
+      stats.guilds[message.guild.id].channels[message.channel.id].users[message.author.id] = {"username": message.author.username, "messageCount": 0}
+    }
+    stats.guilds[message.guild.id].channels[message.channel.id].users[message.author.id].messageCount++;
     self.saveStats();
+  },
+
+  userUpdate: function (oldUser, newUser, guildsArray) {
+    if (oldUser.username != newUser.username) {
+      console.log("User \"" + oldUser.username + "\" renamed to \"" + newUser.username + "\"");
+      for (var i = 0; i < guildsArray.length; i++) {
+        var channelsArray = guildsArray[i].channels.array();
+        for (var j = 0; j < channelsArray.length; j++) {
+          if(stats.guilds[guildsArray[i].id].channels[channelsArray[j].id].users.hasOwnProperty(oldUser.id)) {
+            stats.guilds[guildsArray[i].id].channels[channelsArray[j].id].users[oldUser.id].username = newUser.username;
+          }
+        }
+      }
+      self.saveStats();
+    }
   }
 }
