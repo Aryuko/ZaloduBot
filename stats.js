@@ -9,9 +9,9 @@ var self = module.exports = {
     try {
       stats = require(statsFilePath);
     } catch (e) {
-      //create file??
-      console.log("Missing stats file: " + e);
-      process.exit(1);
+      /* Create empty stats file if there's no stats file */
+      stats = {};
+      self.saveStats();
     }
   },
 
@@ -67,14 +67,18 @@ var self = module.exports = {
     self.saveStats();
   },
 
-  userUpdate: function (oldUser, newUser, guildsArray) {
-    if (oldUser.username != newUser.username) {
-      console.log("User \"" + oldUser.username + "\" renamed to \"" + newUser.username + "\"");
-      for (var i = 0; i < guildsArray.length; i++) {
-        var channelsArray = guildsArray[i].channels.array();
-        for (var j = 0; j < channelsArray.length; j++) {
-          if(stats.guilds[guildsArray[i].id].channels[channelsArray[j].id].users.hasOwnProperty(oldUser.id)) {
-            stats.guilds[guildsArray[i].id].channels[channelsArray[j].id].users[oldUser.id].username = newUser.username;
+  userUpdate: function (id, oldUsername, newUsername) {
+    if (oldUsername != newUsername) {
+      var guildsArray = stats.guilds;
+      var guildKeys = Object.keys(guildsArray);
+
+      for (var i = 0; i < guildKeys.length; i++) {
+        var channelsArray = guildsArray[guildKeys[i]].channels;
+        var channelKeys = Object.keys(channelsArray);
+
+        for (var j = 0; j < channelKeys.length; j++) {
+          if(channelsArray[channelKeys[j]].users.hasOwnProperty(id)) {
+            channelsArray[channelKeys[j]].users[id].username = newUsername;
           }
         }
       }

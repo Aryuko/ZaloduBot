@@ -28,7 +28,7 @@ bot.on("ready", function () {
   var guildsArray = bot.guilds.array();
   console.log("Bot is alive! Serving " + guildsArray.length + " servers.");
 
-  bot.user.setStatus("online");
+  bot.user.setStatus("invisible");
   bot.user.setGame(":D");
 
   Stats.initGuildStats(guildsArray);
@@ -45,15 +45,11 @@ bot.on("message", function (message) {
     Stats.incrementCount(message);
   }
 
-  /* for debugging renaming */
+  /* for debugging renaming
   if(message.content == "rename") {
-    var oldUser = message.author;
-    var newUser = message.author;
-    newUser.username = "Zalodu2";
-
     message.channel.sendMessage("rename triggered");
-    Stats.userUpdate(oldUser, newUser, bot.guilds.array());
-  }
+    Stats.userUpdate(message.author.id, message.author.username, "Zalodu2");
+  }*/
 });
 
 bot.on("channelCreate", function (channel) {
@@ -66,5 +62,5 @@ bot.on("channelUpdate", function (oldChannel, newChannel) {
 
 
 bot.on("userUpdate", function (oldUser, newUser) {
-  Stats.userUpdate(oldUser, newUser, bot.guilds.array());
+  Stats.userUpdate(oldUser.id, oldUser.username, newUser.username);
 });
