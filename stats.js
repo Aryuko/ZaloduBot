@@ -44,14 +44,14 @@ var self = module.exports = {
   },
 
   channelCreate: function (channel) {
-    console.log("New channel \"" + channel.name + "\" created on server \"" + channel.guild.name + "\"");
+    console.log("New channel \"" + channel.name + "\" created");
     stats.guilds[channel.guild.id].channels[channel.id] = {"name": channel.name, "users": {}}
     self.saveStats();
   },
 
   channelUpdate: function (oldChannel, newChannel) {
     if (oldChannel.name != newChannel.name) {
-      console.log("Channel \"" + oldChannel.name + "\" on server \"" + oldChannel.guild.name + "\" renamed to \"" + newChannel.name + "\"");
+      console.log("Channel \"" + oldChannel.name + "\" renamed to \"" + newChannel.name + "\"");
       stats.guilds[oldChannel.guild.id].channels[oldChannel.id].name = newChannel.name;
       self.saveStats();
     }
