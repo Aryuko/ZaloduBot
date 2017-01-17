@@ -1,4 +1,16 @@
 var Stats = require("./stats.js");
+var fs = require("fs");
+
+var serverconfigFilePath = "./serverconfig.json";
+try {
+  Serverconfig = require(serverconfigFilePath);
+} catch (e) {
+  /* Create empty serverconfig file if there's no serverconfig file */
+  Serverconfig = {};
+  fs.writeFile(serverconfigFilePath, JSON.stringify(stats, null, 2), function (err) {
+    if (err) return console.log(err);
+  });
+}
 
 console.log("Starting ZaloduBot...");
 try {
@@ -28,39 +40,89 @@ bot.on("ready", function () {
   var guildsArray = bot.guilds.array();
   console.log("Bot is alive! Serving " + guildsArray.length + " servers.");
 
-  bot.user.setStatus("invisible");
-  bot.user.setGame(":D");
+  bot.user.setStatus("online");
 
   Stats.initGuildStats(guildsArray);
 });
 
 bot.on("disconnected", function () {
-  console.log("Bot disconnected D:");
+  console.log("Bot disconnected");
   process.exit(1);  //exits node.js with an error
 });
 
 
 bot.on("message", function (message) {
+  if(!message.author.bot && message.isMentioned(bot.user)) {
+    var command = message.content.split(" ")[1];
+    var params = message.content.split(" ").slice(2);
+
+    /*
+    console.log(message.content);
+    console.log(command);
+    console.log(params);
+    */
+
+    // Set up serverconfig
+    /*
+    if (command == "setup") {
+      if(hasPermission(message)) {
+        //Start some kind of conversation mode? Locked to the one user?
+        message.channel.sendMessage("");
+      }
+      else {
+        message.channel.sendMessage("Access denied.");
+      }
+    }
+    */
+    // Restarts the bot
+    if (command == "restart") {
+
+    }
+    // Outputs the amount of channels the bot has access to in the server
+    else if (command == "channels") {
+    /*
+      var channels = message.guild.channels.filter(function (c) {
+        return c.permissionsFor(bot.user).serialize()["READ_MESSAGES"];
+      });
+
+      message.channel.sendMessage("Able to track statistics for " + channels.array().length + " channels on this server.");
+    }
+    */
+    }
+
+    // Looks up and returns all known usernames for the given user
+    else if (command == "usernames") {
+
+    }
+  }
+  /* let's focus on config for now
   if(!message.author.bot) {
     Stats.incrementCount(message);
   }
-
-  /* for debugging renaming
-  if(message.content == "rename") {
-    message.channel.sendMessage("rename triggered");
-    Stats.userUpdate(message.author.id, message.author.username, "Zalodu2");
-  }*/
+  */
 });
 
+
 bot.on("channelCreate", function (channel) {
-  Stats.channelCreate(channel);
+  if(channel.type == "text") {
+    Stats.channelCreate(channel);
+  }
 });
 
 bot.on("channelUpdate", function (oldChannel, newChannel) {
-  Stats.channelUpdate(oldChannel, newChannel);
+  if(oldChannel.type == "text") {
+    Stats.channelUpdate(oldChannel, newChannel);
+  }
 });
 
 
-bot.on("userUpdate", function (oldUser, newUser) {
-  Stats.userUpdate(oldUser.id, oldUser.username, newUser.username);
+bot.on("guildMemberUpdate", function (oldMember, newMember) {
+  Stats.guildMemberUpdate(oldMember, newMember);
 });
+
+/*  not necessary atm
+function hasPermission(message) {
+  if (message.author.id == message.guild.owner.id || author has admin permission node || author has one dev role) {
+
+  }
+}*/

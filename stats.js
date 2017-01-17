@@ -15,6 +15,7 @@ var self = module.exports = {
     }
   },
 
+  // Saves the global stats variable to the json file at statsFilePath
   saveStats: function () {
       fs.writeFile(statsFilePath, JSON.stringify(stats, null, 2), function (err) {
         if (err) return console.log(err);
@@ -22,24 +23,67 @@ var self = module.exports = {
       });
   },
 
-  //check if there's an entry for each server, if
+  // Build the json stats file with the given guilds.
   initGuildStats: function (guildsArray) {
     self.loadStats();
     if (!stats.hasOwnProperty("guilds")) {
       stats = {"guilds" : {}};
     }
 
+    // For all guilds in given array of guilds
     for (var i = 0; i < guildsArray.length; i++) {
+      // If there's no record of the guild, add an empty record
       if (!stats.guilds.hasOwnProperty(guildsArray[i].id)) {
-        stats.guilds[guildsArray[i].id] = {"name": guildsArray[i].name, "channels": {}};
+        stats.guilds[guildsArray[i].id] = {"name": guildsArray[i].name, "members": {}, "channels": {}};
       }
+      var statsGuild = stats.guilds[guildsArray[i].id];
+
+      // For all members in the guild
+      var membersArray = guildsArray[i].members.array();
+      for (var j = 0; j < membersArray.length; j++) {
+        // If there's no entry for the member, add a record containing current username and nickname
+        if (!statsGuild.members.hasOwnProperty(membersArray[j].id)) {
+          statsGuild.members[membersArray[j].id] = {"discriminator": membersArray[j].user.discriminator, "displayName": membersArray[j].displayName, "usernames": {}, "nicknames": {}};
+          statsGuild.members[membersArray[j].id].usernames[membersArray[j].user.username] = {};
+          statsGuild.members[membersArray[j].id].nicknames[membersArray[j].nickname] = {};
+        }
+        var statsMember = statsGuild.members[membersArray[j].id];
+
+        // If username is different from saved username, add the new one
+        if(membersArray[j].user.username != statsMember.username) {
+          statsMember.usernames[membersArray[j].user.username] = {};
+        }
+
+        // If nickname is different from saved nickname, add the new one
+        if(membersArray[j].nickname != statsMember.nickname) {
+          statsMember.nicknames[membersArray[j].nickname] = {};
+        }
+
+        // If displayName is different from saved displayName, update it
+        if(membersArray[j].displayName != statsMember.displayName) {
+          statsMember.displayName = membersArray[j].displayName;
+        }
+      }
+
+      // For all channels in the guild
       var channelsArray = guildsArray[i].channels.array();
       for (var j = 0; j < channelsArray.length; j++) {
+        // Only proceed for text channels
         if (channelsArray[j].type == "text") {
-          stats.guilds[guildsArray[i].id].channels[channelsArray[j].id] = {"name": channelsArray[j].name, "users": {}};
+          // If there's no entry for the channel, add an empty record
+          if (!statsGuild.channels.hasOwnProperty(channelsArray[j].id)) {
+            statsGuild.channels[channelsArray[j].id] = {"name": channelsArray[j].name, "users": {}};
+          }
+          var statsChannel = statsGuild.channels[channelsArray[j].id];
+
+          // If name of channel name is different from saved name, update it
+          if(channelsArray[j].name != statsChannel.name) {
+            statsChannel.name = channelsArray[j].name;
+          }
         }
       }
     }
+
     self.saveStats();
   },
 
@@ -59,29 +103,40 @@ var self = module.exports = {
 
   incrementCount: function (message) {
     messageCounter++;
-    /* if there's no record for the user for the channel, add a record*/
+    // if there's no record for the user for the channel, add a record
     if (!stats.guilds[message.guild.id].channels[message.channel.id].users.hasOwnProperty(message.author.id)) {
-      stats.guilds[message.guild.id].channels[message.channel.id].users[message.author.id] = {"username": message.author.username, "messageCount": 0}
+      stats.guilds[message.guild.id].channels[message.channel.id].users[message.author.id] = {"messageCount": 0}
     }
     stats.guilds[message.guild.id].channels[message.channel.id].users[message.author.id].messageCount++;
     self.saveStats();
   },
 
-  userUpdate: function (id, oldUsername, newUsername) {
-    if (oldUsername != newUsername) {
-      var guildsArray = stats.guilds;
-      var guildKeys = Object.keys(guildsArray);
+  guildMemberUpdate: function (oldMember, newMember) {
+    if (oldMember.user.username != newMember.user.username || oldMember.nickname != newMember.nickname) {
+      var statsGuild = stats.guilds[oldMember.guild.id];
 
-      for (var i = 0; i < guildKeys.length; i++) {
-        var channelsArray = guildsArray[guildKeys[i]].channels;
-        var channelKeys = Object.keys(channelsArray);
-
-        for (var j = 0; j < channelKeys.length; j++) {
-          if(channelsArray[channelKeys[j]].users.hasOwnProperty(id)) {
-            channelsArray[channelKeys[j]].users[id].username = newUsername;
-          }
-        }
+      // If there's no record for the user, add a record including the old username
+      if (!statsGuild.members.hasOwnProperty(oldMember.id)) {
+        statsGuild.members[oldMember.id] = {"discriminator": oldMember.user.discriminator, "displayName": oldMember.displayName, "usernames": {}, "nicknames": {}};
+        statsGuild.members[oldMember.id].usernames[oldMember.user.username] = {};
+        statsGuild.members[oldMember.id].nicknames[oldMember.nickname] = {};
       }
+
+      // Add new username to list of usernames
+      if (oldMember.user.username != newMember.user.username) {
+        console.log("User \"" + oldMember.id + "\" changed username from \"" + oldMember.user.username + "\" to \"" + newMember.user.username +"\"");
+        statsGuild.members[oldMember.id].usernames[newMember.user.username] = {};
+      }
+
+      // Add new nickname to list of nicknames
+      if (oldMember.nickname != newMember.nickname) {
+        console.log("User \"" + oldMember.id + "\" changed nickname from \"" + oldMember.nickname + "\" to \"" + newMember.nickname +"\"");
+        statsGuild.members[oldMember.id].nicknames[newMember.nickname] = {};
+      }
+
+      // Update to new displayName
+      statsGuild.members[oldMember.id].displayName = newMember.displayName;
+
       self.saveStats();
     }
   }
