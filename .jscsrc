@@ -1,0 +1,25 @@
+{
+    "requireCurlyBraces" : true,
+    "disallowMultipleSpaces" : true,
+    "validateIndentation" : 2,
+    "requireCapitalizedConstructors" : true,
+    "requireSemicolons" : true,
+    "requireSpaceAfterKeywords" : true,
+    "requireSpaceBetweenArguments": true,
+    "disallowVar": false,
+    "requireSpaceAfterBinaryOperators": [
+        "=",
+        ",",
+        "+",
+        "-",
+        "/",
+        "*",
+        "==",
+        "===",
+        "!=",
+        "!==",
+        "%",
+        "&&",
+        "||"
+    ]
+}
