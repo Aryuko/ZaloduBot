@@ -1,0 +1,35 @@
+{
+  "guilds": {
+    "123123123" : {
+      "name" :"abc",
+      "members": {
+        "223123123" : {
+          "discriminator": 1234,
+          "displayName" : "Zalodu",
+          "nicknames": {
+            "Zalodu3": {},
+            "Zalodu4": {}
+          }
+        },
+      "channels": {
+        "123123123": {
+          "name": "general",
+          "users": {
+            "123123123": {
+              "messageCount": 0
+              } 
+            }
+          }
+        }
+      }
+    }
+  },
+  "users": {
+    "223123123": {
+      "usernames": {
+        "Zalodu1": {},
+        "Zalodu2": {}
+      }
+    }
+  }
+}
