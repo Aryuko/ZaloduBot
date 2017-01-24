@@ -30,8 +30,16 @@ var self = module.exports = {
       stats = {"guilds" : {}, "users": {}};
     }
 
+    console.log("Starting data initialization...");
+    var newUsernames = 0;
+    var newNicknames = 0;
+    var totalUsers = 0;
+    var newUsers = 0;
+    var startTime = Date.now();
+
     // For all guilds in given array of guilds
     for (var i = 0; i < guildsArray.length; i++) {
+      totalUsers += guildsArray[i].members.array().length;
       // If there's no record of the guild, add an empty record
       if (!stats.guilds.hasOwnProperty(guildsArray[i].id)) {
         stats.guilds[guildsArray[i].id] = {"name": guildsArray[i].name, "members": {}, "channels": {}};
@@ -41,22 +49,32 @@ var self = module.exports = {
       // For all members in the guild
       var membersArray = guildsArray[i].members.array();
       for (var j = 0; j < membersArray.length; j++) {
-        // If there's no entry for the member, add a record containing current username and nickname
+        // If there's no entry for the member, add a record containing current nickname
         if (!statsGuild.members.hasOwnProperty(membersArray[j].id)) {
-          statsGuild.members[membersArray[j].id] = {"discriminator": membersArray[j].user.discriminator, "displayName": membersArray[j].displayName, "usernames": {}, "nicknames": {}};
-          statsGuild.members[membersArray[j].id].usernames[membersArray[j].user.username] = {};
+          statsGuild.members[membersArray[j].id] = {"discriminator": membersArray[j].user.discriminator, "displayName": membersArray[j].displayName, "nicknames": {}};
           statsGuild.members[membersArray[j].id].nicknames[membersArray[j].nickname] = {};
         }
-        var statsMember = statsGuild.members[membersArray[j].id];
 
-        // If username is different from saved username, add the new one
-        if (membersArray[j].user.username != statsMember.username) {
-          statsMember.usernames[membersArray[j].user.username] = {};
+        // If there's no record for the user, add a record including the current username
+        if (!stats.users.hasOwnProperty(membersArray[j].id)) {
+          stats.users[membersArray[j].id] = {"usernames": {}};
+          stats.users[membersArray[j].id].usernames[membersArray[j].user.username] = {};
+          newUsers ++;
         }
 
-        // If nickname is different from saved nickname, add the new one
-        if (membersArray[j].nickname != statsMember.nickname) {
+        var statsMember = statsGuild.members[membersArray[j].id];
+        var statsUser = stats.users[membersArray[j].id];
+
+        // If there's no record for the current username, add the new one
+        if (!statsUser.usernames.hasOwnProperty(membersArray[j].user.username)) {
+          statsUser.usernames[membersArray[j].user.username] = {};
+          newUsernames ++;
+        }
+
+        // If there's no record for the current nickname, add the new one
+        if (!statsMember.nicknames.hasOwnProperty(membersArray[j].nickname)) {
           statsMember.nicknames[membersArray[j].nickname] = {};
+          newNicknames ++;
         }
 
         // If displayName is different from saved displayName, update it
@@ -84,6 +102,9 @@ var self = module.exports = {
       }
     }
 
+    var finalTime = (Date.now() - startTime) / 1000.0;
+    console.log("Finished initializing " + guildsArray.length + " guilds with " + totalUsers + " users taking " + finalTime + "s.");
+    console.log(newUsers + " new users, " + newUsernames + " users had new usernames, " + newNicknames + " users had new nicknames");
     self.saveStats();
   },
 
@@ -115,7 +136,7 @@ var self = module.exports = {
     if (oldMember.nickname != newMember.nickname) {
       var statsGuild = stats.guilds[oldMember.guild.id];
 
-      // If there's no record for the user, add a record including the old username
+      // If there's no record for the user, add a record including the old nickname
       if (!statsGuild.members.hasOwnProperty(oldMember.id)) {
         statsGuild.members[oldMember.id] = {"discriminator": oldMember.user.discriminator, "displayName": oldMember.displayName, "nicknames": {}};
         statsGuild.members[oldMember.id].nicknames[oldMember.nickname] = {};
