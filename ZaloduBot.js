@@ -8,7 +8,7 @@ try {
   /* Create empty serverconfig file if there's no serverconfig file */
   Serverconfig = {};
   fs.writeFile(serverconfigFilePath, JSON.stringify(stats, null, 2), function (err) {
-    if (err) return console.log(err);
+    if (err) { return console.log(err); }
   });
 }
 
@@ -42,17 +42,17 @@ bot.on("ready", function () {
 
   bot.user.setStatus("online");
 
-  Stats.initGuildStats(guildsArray);
+  Stats.initStats(guildsArray);
 });
 
 bot.on("disconnected", function () {
   console.log("Bot disconnected");
-  process.exit(1);  //exits node.js with an error
+  process.exit(1); //exits node.js with an error
 });
 
 
 bot.on("message", function (message) {
-  if(!message.author.bot && message.isMentioned(bot.user)) {
+  if (!message.author.bot && message.isMentioned(bot.user)) {
     var command = message.content.split(" ")[1];
     var params = message.content.split(" ").slice(2);
 
@@ -104,13 +104,13 @@ bot.on("message", function (message) {
 
 
 bot.on("channelCreate", function (channel) {
-  if(channel.type == "text") {
-    Stats.channelCreate(channel);
+  if (channel.type == "text") {
+    Stats.channelCreate(channel); 
   }
 });
 
 bot.on("channelUpdate", function (oldChannel, newChannel) {
-  if(oldChannel.type == "text") {
+  if (oldChannel.type == "text") {
     Stats.channelUpdate(oldChannel, newChannel);
   }
 });
@@ -118,6 +118,10 @@ bot.on("channelUpdate", function (oldChannel, newChannel) {
 
 bot.on("guildMemberUpdate", function (oldMember, newMember) {
   Stats.guildMemberUpdate(oldMember, newMember);
+});
+
+bot.on("userUpdate", function (oldUser, newUser) {
+  Stats.userUpdate(oldUser, newUser);
 });
 
 /*  not necessary atm
