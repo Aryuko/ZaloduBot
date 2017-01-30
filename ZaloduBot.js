@@ -1,5 +1,6 @@
 var Stats = require("./stats.js");
 var fs = require("fs");
+var embedColour = "#738BD7"; //TODO: Move to serverconfig as embedColour?
 
 var serverconfigFilePath = "./serverconfig.json";
 try {
@@ -94,6 +95,7 @@ bot.on("message", function (message) {
 
     // Looks up and returns all known usernames and nicknames for the given user
     else if (command == "names") {
+      var startTime = Date.now();
       var userId;
       var userByDisplayName = message.guild.members.find(function (member) { return member.displayName == params[0]; });
 
@@ -125,6 +127,24 @@ bot.on("message", function (message) {
       var nicknames = Stats.getNicknames(userId, message.guild.id);
       console.log(usernames);
       console.log(nicknames);
+
+      var member = message.guild.members.get(userId);
+      var finalTime = (Date.now() - startTime) / 1000.0;
+
+      var usernamesString = "";
+      var nicknamesString = "";
+      var embed = new Discord.RichEmbed()
+      .setAuthor(member.displayName)
+      .setColor(embedColour)
+      .setFooter("Lookup took " + finalTime + " seconds.")
+      .addField("Usernames", 'Field Value', true)
+      .addField("Nicknames", 'Hmm 🤔', true)
+
+      message.channel.sendEmbed(
+        embed,
+        '',
+        { disableEveryone: true }
+      );
     }
     // Finds all users that have used the given displayname
     else if (command == "") {
