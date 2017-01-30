@@ -96,7 +96,7 @@ bot.on("message", function (message) {
     else if (command == "names") {
       var userId;
       var userByDisplayName = message.guild.members.find(function (member) { return member.displayName == params[0]; });
-      
+
       // no parameters
       if (params.length < 1) {
         message.channel.sendMessage("Incorrect parameters, please include a user id, a displayname of a user, or a user mention.");
@@ -121,8 +121,10 @@ bot.on("message", function (message) {
         message.channel.sendMessage("No user \"" + params[0] + "\" found.");
         return;
       }
-
-
+      var usernames = Stats.getUsernames(userId);
+      var nicknames = Stats.getNicknames(userId, message.guild.id);
+      console.log(usernames);
+      console.log(nicknames);
     }
     // Finds all users that have used the given displayname
     else if (command == "") {

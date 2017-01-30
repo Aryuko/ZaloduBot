@@ -108,6 +108,24 @@ var self = module.exports = {
     self.saveStats();
   },
 
+  getUsernames: function (userId) {
+    if (stats.users.hasOwnProperty(userId)) {
+      return stats.users[userId].usernames;
+    }
+    else {
+      return false;
+    }
+  },
+
+  getNicknames: function (userId, guildId) {
+    if (stats.guilds[guildId].members.hasOwnProperty(userId)) {
+      return stats.guilds[guildId].members[userId].nicknames;
+    }
+    else {
+      return false;
+    }
+  },
+
   channelCreate: function (channel) {
     console.log("New channel \"" + channel.name + "\" created");
     stats.guilds[channel.guild.id].channels[channel.id] = {"name": channel.name, "users": {}};
