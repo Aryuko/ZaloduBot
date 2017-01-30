@@ -52,9 +52,11 @@ bot.on("disconnected", function () {
 
 
 bot.on("message", function (message) {
-  if (!message.author.bot && message.isMentioned(bot.user)) {
-    var command = message.content.split(" ")[1];
-    var params = message.content.split(" ").slice(2);
+  //if (!message.author.bot && message.content[0] == Serverconfig.guilds[message.guild.id].commandPrefix && message.content.length > 1) {
+  if (!message.author.bot && message.content[0] == "!" && message.content.length > 1) {
+    var command = message.content.split(" ")[0].slice(1);
+    var params = message.content.split(" ").slice(1);
+    var mentions = message.mentions;
 
     /*
     console.log(message.content);
@@ -90,8 +92,29 @@ bot.on("message", function (message) {
     */
     }
 
-    // Looks up and returns all known usernames for the given user
-    else if (command == "usernames") {
+    // Looks up and returns all known usernames and nicknames for the given user
+    else if (command == "displaynames") {
+      var userId;
+      console.log("Has id: " + message.guild.members.hasOwnProperty(params[0]));
+      console.log(message.guild.members[0].id);
+      console.log("Has displayname: " + message.guild.members.find(function (member) { return member.displayname == params[0]; }));
+      // if user is mentioned
+      if (mentions.users.array().length > 0) {
+        userId = mentions.users.array()[0].id;
+        //message.channel.sendMessage("User " + mentions.users.array()[0].username + " found on this server.");
+      }
+      // if parameter is a user id
+      else if (message.guild.members.hasOwnProperty(params[0])) {
+        message.channel.sendMessage("User id " + params[0] + " found on this server.");
+      }
+      // if parameter is a user displayname
+      else if (message.guild.members.find(function (member) { return member.displayname == params[0]; })) {
+        message.channel.sendMessage("User " + params[0] + " found on this server.");
+      }
+
+    }
+    // Finds all users that have used the given displayname
+    else if (command == "") {
 
     }
   }
