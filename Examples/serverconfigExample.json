@@ -1,12 +1,15 @@
 {
-  "200770186972889088": {
-    "name": "Zalodu",
-    "devChannel": "259477403586396161",
-    "devRoles": {
-      
-    },
-    "ignoredChannels": {
+  "guilds": {
+    "200770186972889088": {
+      "name": "Zalodu",
+      "devChannel": "259477403586396161",
+      "commandPrefix": "!",
+      "devRoles": {
+        
+      },
+      "ignoredChannels": {
 
+      }
     }
   }
 }
