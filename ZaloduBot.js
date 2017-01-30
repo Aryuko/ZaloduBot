@@ -93,23 +93,32 @@ bot.on("message", function (message) {
     }
 
     // Looks up and returns all known usernames and nicknames for the given user
-    else if (command == "displaynames") {
+    else if (command == "names") {
       var userId;
-      console.log("Has id: " + message.guild.members.hasOwnProperty(params[0]));
-      console.log(message.guild.members[0].id);
-      console.log("Has displayname: " + message.guild.members.find(function (member) { return member.displayname == params[0]; }));
+      console.log("\nparams[0] = " + params[0]);
+      console.log("Has displayname: " + message.guild.members.find(function (member) { return member.displayName == params[0]; }));
+      // no parameters
+      if (params.length < 1) {
+        message.channel.sendMessage("Incorrect parameters, please include a user id, a displayname of a user, or a user mention.");
+      }
       // if user is mentioned
-      if (mentions.users.array().length > 0) {
+      else if (mentions.users.array().length > 0) {
         userId = mentions.users.array()[0].id;
         //message.channel.sendMessage("User " + mentions.users.array()[0].username + " found on this server.");
       }
       // if parameter is a user id
-      else if (message.guild.members.hasOwnProperty(params[0])) {
-        message.channel.sendMessage("User id " + params[0] + " found on this server.");
+      else if (message.guild.members.has(params[0])) {
+        userId = params[0];
+        //message.channel.sendMessage("User id " + message.guild.members.get(userId) + " found on this server.");
       }
       // if parameter is a user displayname
-      else if (message.guild.members.find(function (member) { return member.displayname == params[0]; })) {
+      else if (message.guild.members.find(function (member) { return member.displayName == params[0]; })) {
         message.channel.sendMessage("User " + params[0] + " found on this server.");
+      }
+      // no user found
+      else {
+        message.channel.sendMessage("No user \"" + params[0] + "\" found.");
+        return;
       }
 
     }
