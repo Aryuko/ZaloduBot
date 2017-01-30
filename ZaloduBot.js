@@ -123,22 +123,20 @@ bot.on("message", function (message) {
         message.channel.sendMessage("No user \"" + params[0] + "\" found.");
         return;
       }
-      var usernames = Stats.getUsernames(userId);
-      var nicknames = Stats.getNicknames(userId, message.guild.id);
+      var usernames = Stats.getUsernamesString(userId);
+      var nicknames = Stats.getNicknamesString(userId, message.guild.id);
       console.log(usernames);
       console.log(nicknames);
 
       var member = message.guild.members.get(userId);
       var finalTime = (Date.now() - startTime) / 1000.0;
 
-      var usernamesString = "";
-      var nicknamesString = "";
       var embed = new Discord.RichEmbed()
-      .setAuthor(member.displayName)
+      .setAuthor(member.displayName, member.user.avatarURL)
       .setColor(embedColour)
       .setFooter("Lookup took " + finalTime + " seconds.")
-      .addField("Usernames", 'Field Value', true)
-      .addField("Nicknames", 'Hmm 🤔', true)
+      .addField("Usernames", usernames, true)
+      .addField("Nicknames", nicknames, true)
 
       message.channel.sendEmbed(
         embed,

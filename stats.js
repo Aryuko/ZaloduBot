@@ -108,21 +108,21 @@ var self = module.exports = {
     self.saveStats();
   },
 
-  getUsernames: function (userId) {
+  getUsernamesString: function (userId) {
     if (stats.users.hasOwnProperty(userId)) {
       return stats.users[userId].usernames;
     }
     else {
-      return false;
+      return "No usernames recorded for the user";
     }
   },
 
-  getNicknames: function (userId, guildId) {
+  getNicknamesString: function (userId, guildId) {
     if (stats.guilds[guildId].members.hasOwnProperty(userId)) {
       return stats.guilds[guildId].members[userId].nicknames;
     }
     else {
-      return false;
+      return "No nicknames recorded for the user";
     }
   },
 
