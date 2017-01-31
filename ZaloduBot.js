@@ -1,6 +1,7 @@
 var Stats = require("./stats.js");
 var fs = require("fs");
-var embedColour = "#738BD7"; //TODO: Move to serverconfig as embedColour?
+var embedColor = "#738BD7"; //TODO: Move to serverconfig as embedColor?
+var badColor = "#f74f25"; //TODO: this one too
 
 var serverconfigFilePath = "./serverconfig.json";
 try {
@@ -41,7 +42,7 @@ bot.on("ready", function () {
   var guildsArray = bot.guilds.array();
   console.log("Bot is alive! Serving " + guildsArray.length + " servers.");
 
-  bot.user.setStatus("online");
+  bot.user.setStatus("invisible");
 
   Stats.initStats(guildsArray);
 });
@@ -99,9 +100,11 @@ bot.on("message", function (message) {
       var userId;
       var userByDisplayName = message.guild.members.find(function (member) { return member.displayName == params[0]; });
 
+      var error = 0;
       // no parameters
       if (params.length < 1) {
-        message.channel.sendMessage("Incorrect parameters, please include a user id, a displayname of a user, or a user mention.");
+        error = 1;
+        userId = false;
       }
       // if user is mentioned
       else if (mentions.users.array().length > 0) {
@@ -120,53 +123,76 @@ bot.on("message", function (message) {
       }
       // no user found
       else {
-        message.channel.sendMessage("No user \"" + params[0] + "\" found.");
-        return;
+        error = 2;
+        userId = false;
       }
-      var usernames = Stats.getUsernames(userId);
-      var nicknames = Stats.getNicknames(userId, message.guild.id);
 
-      var uString = "";
-      if (usernames) {
-        for (var key in usernames) {
-          // skip loop if the property is from prototype
-          if (!usernames.hasOwnProperty(key)) { continue; }
+      if (userId) {
+        var usernames = Stats.getUsernames(userId);
+        var nicknames = Stats.getNicknames(userId, message.guild.id);
 
-          uString += key + "\n";
+        var uString = "";
+        if (usernames) {
+          for (var key in usernames) {
+            // skip loop if the property is from prototype
+            if (!usernames.hasOwnProperty(key)) { continue; }
+
+            uString += key + "\n";
+          }
         }
+        else {
+          uString = "No usernames recorded for this user.";
+        }
+
+        var nString = "";
+        if (nicknames) {
+          for (var key in nicknames) {
+            // skip loop if the property is from prototype
+            if (!nicknames.hasOwnProperty(key)) { continue; }
+
+            nString += key + "\n";
+          }
+        }
+        else {
+          nString = "No nicknames recorded for this user.";
+        }
+
+        var member = message.guild.members.get(userId);
+        var finalTime = (Date.now() - startTime) / 1000.0;
+
+        var embed = new Discord.RichEmbed()
+          .setAuthor(member.displayName, member.user.avatarURL)
+          .setColor(member.highestRole.color)
+          .setFooter("Lookup took " + finalTime + " seconds.")
+          .addField("Usernames", uString, true)
+          .addField("Nicknames", nString, true);
+
+        message.channel.sendEmbed(
+          embed,
+          '',
+          { disableEveryone: true }
+        );
       }
       else {
-        uString = "No usernames recorded for this user.";
-      }
-
-      var nString = "";
-      if (nicknames) {
-        for (var key in nicknames) {
-          // skip loop if the property is from prototype
-          if (!nicknames.hasOwnProperty(key)) { continue; }
-
-          nString += key + "\n";
+        var finalTime = (Date.now() - startTime) / 1000.0;
+        var errorString;
+        if (error) {
+          if (error == 1) { errorString = "Incorrect parameters, please include a user id, a displayname of a user, or a user mention."; }
+          if (error == 2) { errorString = "No user \"" + params[0] + "\" found"; }
         }
-      }
-      else {
-        nString = "No nicknames recorded for this user.";
-      }
+        else { errorString = "An unknown error has ocurred";}
 
-      var member = message.guild.members.get(userId);
-      var finalTime = (Date.now() - startTime) / 1000.0;
+        var embed = new Discord.RichEmbed()
+          .setColor(badColor)
+          .addField("Error", errorString)
+          .setFooter("Lookup took " + finalTime + " seconds.");
 
-      var embed = new Discord.RichEmbed()
-      .setAuthor(member.displayName, member.user.avatarURL)
-      .setColor(embedColour)
-      .setFooter("Lookup took " + finalTime + " seconds.")
-      .addField("Usernames", uString, true)
-      .addField("Nicknames", nString, true)
-
-      message.channel.sendEmbed(
-        embed,
-        '',
-        { disableEveryone: true }
-      );
+        message.channel.sendEmbed(
+          embed,
+          '',
+          { disableEveryone: true }
+        );
+      }     
     }
     // Finds all users that have used the given displayname
     else if (command == "") {
@@ -179,7 +205,6 @@ bot.on("message", function (message) {
   }
   */
 });
-
 
 bot.on("channelCreate", function (channel) {
   if (channel.type == "text") {
