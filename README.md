@@ -14,4 +14,6 @@ A discord bot for tracking usernames, nicknames, and stats, with more features p
     * ``npm install hammerandchisel/erlpack`` for significantly faster WebSocket data (de)serialisation.
 
 ## Usage
-No commands yet, will update this later.
+
+### Commands
+* ``!names <userMention/userID/userDisplayName>``: Lists all recorded usernames and nicknames for the given user, using either a user mention, the ID of the user, or the current display name of the user as a parameter. 
