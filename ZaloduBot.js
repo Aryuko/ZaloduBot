@@ -123,10 +123,34 @@ bot.on("message", function (message) {
         message.channel.sendMessage("No user \"" + params[0] + "\" found.");
         return;
       }
-      var usernames = Stats.getUsernamesString(userId);
-      var nicknames = Stats.getNicknamesString(userId, message.guild.id);
-      console.log(usernames);
-      console.log(nicknames);
+      var usernames = Stats.getUsernames(userId);
+      var nicknames = Stats.getNicknames(userId, message.guild.id);
+
+      var uString = "";
+      if (usernames) {
+        for (var key in usernames) {
+          // skip loop if the property is from prototype
+          if (!usernames.hasOwnProperty(key)) { continue; }
+
+          uString += key + "\n";
+        }
+      }
+      else {
+        uString = "No usernames recorded for this user.";
+      }
+
+      var nString = "";
+      if (nicknames) {
+        for (var key in nicknames) {
+          // skip loop if the property is from prototype
+          if (!nicknames.hasOwnProperty(key)) { continue; }
+
+          nString += key + "\n";
+        }
+      }
+      else {
+        nString = "No nicknames recorded for this user.";
+      }
 
       var member = message.guild.members.get(userId);
       var finalTime = (Date.now() - startTime) / 1000.0;
@@ -135,8 +159,8 @@ bot.on("message", function (message) {
       .setAuthor(member.displayName, member.user.avatarURL)
       .setColor(embedColour)
       .setFooter("Lookup took " + finalTime + " seconds.")
-      .addField("Usernames", usernames, true)
-      .addField("Nicknames", nicknames, true)
+      .addField("Usernames", uString, true)
+      .addField("Nicknames", nString, true)
 
       message.channel.sendEmbed(
         embed,
