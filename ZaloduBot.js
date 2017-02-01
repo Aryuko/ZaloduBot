@@ -239,6 +239,10 @@ bot.on("guildMemberAdd", function (member) {
   Stats.guildMemberAdd(member);
 });
 
+bot.on("guildCreate", function (guild) {
+  Stats.guildCreate(guild);
+})
+
 /*  not necessary atm
 function hasPermission(message) {
   if (message.author.id == message.guild.owner.id || author has admin permission node || author has one dev role) {
