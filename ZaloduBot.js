@@ -1,7 +1,6 @@
 var Stats = require("./stats.js");
 var fs = require("fs");
-var embedColor = "#738BD7"; //TODO: Move to serverconfig as embedColor?
-var badColor = "#f74f25"; //TODO: this one too
+var errorColor = "#f74f25"; //TODO: this one too
 
 var serverconfigFilePath = "./serverconfig.json";
 try {
@@ -181,6 +180,7 @@ bot.on("message", function (message) {
           console.log(err.response.statusCode + ": " + err.response.res.statusMessage + ", " + err.response.res.text);
         });
       }
+      // Error ocurred
       else {
         var finalTime = (Date.now() - startTime) / 1000.0;
         var errorString;
@@ -191,7 +191,7 @@ bot.on("message", function (message) {
         else { errorString = "An unknown error has ocurred";}
 
         var embed = new Discord.RichEmbed()
-          .setColor(badColor)
+          .setColor(errorColor)
           .addField("Error", errorString)
           .setFooter("Lookup took " + finalTime + " seconds.");
 
