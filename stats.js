@@ -52,7 +52,10 @@ var self = module.exports = {
         // If there's no entry for the member, add a record containing current nickname
         if (!statsGuild.members.hasOwnProperty(membersArray[j].id)) {
           statsGuild.members[membersArray[j].id] = {"discriminator": membersArray[j].user.discriminator, "displayName": membersArray[j].displayName, "nicknames": {}};
-          statsGuild.members[membersArray[j].id].nicknames[membersArray[j].nickname] = {};
+          // Only add the nickname if it is not null
+          if (membersArray[j].nickname != null) {
+            statsGuild.members[membersArray[j].id].nicknames[membersArray[j].nickname] = {};
+          }
         }
 
         // If there's no record for the user, add a record including the current username
@@ -71,8 +74,8 @@ var self = module.exports = {
           newUsernames ++;
         }
 
-        // If there's no record for the current nickname, add the new one
-        if (!statsMember.nicknames.hasOwnProperty(membersArray[j].nickname)) {
+        // If there's no record for the current nickname and it is not null, add the new one
+        if (!statsMember.nicknames.hasOwnProperty(membersArray[j].nickname) && membersArray[j].nickname != null) {
           statsMember.nicknames[membersArray[j].nickname] = {};
           newNicknames ++;
         }
@@ -110,7 +113,12 @@ var self = module.exports = {
 
   getUsernames: function (userId) {
     if (stats.users.hasOwnProperty(userId)) {
-      return stats.users[userId].usernames;
+      if (Object.keys(stats.users[userId].usernames).length > 0) {
+        return stats.users[userId].usernames;
+      }
+      else {
+        return false;
+      }
     }
     else {
       return false;
@@ -119,7 +127,12 @@ var self = module.exports = {
 
   getNicknames: function (userId, guildId) {
     if (stats.guilds[guildId].members.hasOwnProperty(userId)) {
-      return stats.guilds[guildId].members[userId].nicknames;
+      if (Object.keys(stats.guilds[guildId].members[userId].nicknames).length > 0) {
+        return stats.guilds[guildId].members[userId].nicknames;
+      }
+      else {
+        return false;
+      }
     }
     else {
       return false;
@@ -157,15 +170,20 @@ var self = module.exports = {
       // If there's no record for the member, add a record including the old nickname
       if (!statsGuild.members.hasOwnProperty(oldMember.id)) {
         statsGuild.members[oldMember.id] = {"discriminator": oldMember.user.discriminator, "displayName": oldMember.displayName, "nicknames": {}};
-        statsGuild.members[oldMember.id].nicknames[oldMember.nickname] = {};
+        // Only add the old nickname if it is not null
+        if (oldMember.nickname != null) {
+          statsGuild.members[oldMember.id].nicknames[oldMember.nickname] = {};
+        }
       }
 
       // Add new nickname to list of nicknames
       console.log("User \"" + oldMember.id + "\" changed nickname from \"" + oldMember.nickname + "\" to \"" + newMember.nickname + "\"");
       statsGuild.members[oldMember.id].nicknames[newMember.nickname] = {};
 
-      // Update to new displayName
-      statsGuild.members[oldMember.id].displayName = newMember.displayName;
+      // Add the new nickname if it is not null
+      if (oldMember.nickname != null) {
+        statsGuild.members[oldMember.id].displayName = newMember.displayName;
+      }
 
       self.saveStats();
     }

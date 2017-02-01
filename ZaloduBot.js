@@ -171,7 +171,15 @@ bot.on("message", function (message) {
           embed,
           '',
           { disableEveryone: true }
-        );
+        )
+        .then(function (output) {
+          //console.log(output);
+        })
+        .catch(function (err) {
+          console.log("Error during \"" + command + "\" command with params:");
+          console.log(params);
+          console.log(err.response.statusCode + ": " + err.response.res.statusMessage + ", " + err.response.res.text);
+        });
       }
       else {
         var finalTime = (Date.now() - startTime) / 1000.0;
