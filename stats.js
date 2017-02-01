@@ -176,14 +176,14 @@ var self = module.exports = {
         }
       }
 
-      // Add new nickname to list of nicknames
       console.log("User \"" + oldMember.id + "\" changed nickname from \"" + oldMember.nickname + "\" to \"" + newMember.nickname + "\"");
-      statsGuild.members[oldMember.id].nicknames[newMember.nickname] = {};
-
-      // Add the new nickname if it is not null
-      if (oldMember.nickname != null) {
-        statsGuild.members[oldMember.id].displayName = newMember.displayName;
+      
+      // Add the new nickname to list of nicknames if it is not null
+      if (newMember.nickname != null) {
+        statsGuild.members[oldMember.id].nicknames[newMember.nickname] = {};
       }
+      // Update the display name
+      statsGuild.members[oldMember.id].displayName = newMember.displayName;
 
       self.saveStats();
     }
