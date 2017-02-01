@@ -97,7 +97,7 @@ bot.on("message", function (message) {
     else if (command == "names") {
       var startTime = Date.now();
       var userId;
-      var userByDisplayName = message.guild.members.find(function (member) { return member.displayName == params[0]; });
+      var userByDisplayName = message.guild.members.find(function (member) { return member.displayName.toUpperCase() == params[0].toUpperCase(); });
 
       var error = 0;
       // no parameters
