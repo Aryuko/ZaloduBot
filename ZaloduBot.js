@@ -180,7 +180,7 @@ bot.on("message", function (message) {
         errorResponse(message.channel, errorString, (Date.now() - startTime) / 1000.0);
       }     
     }
-    // Finds and displays all users that have used the given displayname
+    // Finds and displays all users that have been seen using the given name
     else if (command == "users") {
       var startTime = Date.now();
       if (params) {
@@ -200,7 +200,7 @@ bot.on("message", function (message) {
           .setColor(defaultColor)
           .setFooter("Time to complete: " + completionTime + " seconds.")
           .setTitle("Result")
-          .setDescription("All users that have used the name **" + params[0] + "** at any point.")
+          .setDescription("All users that have been seen using the name **" + params[0] + "**:")
           .addField("Current name", nString, true)
           .addField("ID", iString, true);
 
