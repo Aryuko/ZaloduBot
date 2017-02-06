@@ -150,37 +150,58 @@ var self = module.exports = {
     }
   },
 
+  /**
+   * Find all members that have used the given name at any point in time
+   * in the given guild.  
+   * 
+   * Returns a map containing a map of users found with their id as key, and errors if any. 
+   */
   getUsersByName: function (name, guild) {
-    if (stats.guilds.hasOwnProperty(guild.id)) {
-      var statsMembers = stats.guilds[guild.id].members;
+    if (name.length > 0) {
+      if (stats.guilds.hasOwnProperty(guild.id)) {
+        var statsMembers = stats.guilds[guild.id].members;
 
-      var foundUsers = {};
+        var data = { "foundUsers": {}, "error": { "code": 0, "message": "" } };
 
-      // Check through stats for members on the guild
-      for (var memberKey in statsMembers) {
-        // Check through all saved nicknames for the member
-        for (var nickname in statsMembers[memberKey].nicknames) {
-          if (nickname == name) {
-            foundUsers[memberKey] = statsMembers[memberKey];
-            break;
-          }
-        }
-        // Check through all saved usernames for the user, if there exists a record for the user
-        if (stats.users.hasOwnProperty(memberKey)) {
-          for (var username in stats.users[memberKey].usernames) {
-            if (username == name && !foundUsers.hasOwnProperty(memberKey)) {
-              foundUsers[memberKey] = statsMembers[memberKey];
+        // Check through stats for members on the guild
+        for (var memberKey in statsMembers) {
+          // Check through all saved nicknames for the member
+          for (var nickname in statsMembers[memberKey].nicknames) {
+            if (nickname.toUpperCase() == name.toUpperCase()) {
+              data.foundUsers[memberKey] = statsMembers[memberKey];
               break;
             }
           }
+          // Check through all saved usernames for the user, if there exists a record for the user
+          if (stats.users.hasOwnProperty(memberKey)) {
+            for (var username in stats.users[memberKey].usernames) {
+              if (username.toUpperCase() == name.toUpperCase() && !data.foundUsers.hasOwnProperty(memberKey)) {
+                data.foundUsers[memberKey] = statsMembers[memberKey];
+                break;
+              }
+            }
+          }
+        }
+        if (Object.keys(data.foundUsers).length > 0) { return data; }
+        else { 
+          // Error: No users found
+          data.error.code = 1;
+          data.error.message = "No users \"" + name + "\" found.";
+          return data; 
         }
       }
-      if (Object.keys(foundUsers).length > 0) { return foundUsers; }
-      else { return false; }
+      else {
+        // Error: No guild info saved
+        data.error.code = 2;
+        data.error.message = "No guild stats saved.";
+        return data;
+      }
     }
     else {
-      // Error: no guild info saved
-      return false;
+      // Error: No parameter
+      data.error.code = 3;
+      data.error.message = "No parameter provided.";
+      return data;
     }
   },
 

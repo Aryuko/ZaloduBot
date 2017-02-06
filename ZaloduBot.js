@@ -54,30 +54,14 @@ bot.on("disconnected", function () {
 
 
 bot.on("message", function (message) {
-  //if (!message.author.bot && message.content[0] == Serverconfig.guilds[message.guild.id].commandPrefix && message.content.length > 1) {
   if (!message.author.bot && message.content[0] == "!" && message.content.length > 1) {
-    var command = message.content.split(" ")[0].slice(1);
-    var params = message.content.split(" ").slice(1);
+    var words = message.content.split(" ");
+    var command = words[0].slice(1);
+    var params;
+    if (words.length > 1) { params = words.slice(1); }
+    else { params = false; }
     var mentions = message.mentions;
 
-    /*
-    console.log(message.content);
-    console.log(command);
-    console.log(params);
-    */
-
-    // Set up serverconfig
-    /*
-    if (command == "setup") {
-      if(hasPermission(message)) {
-        //Start some kind of conversation mode? Locked to the one user?
-        message.channel.sendMessage("");
-      }
-      else {
-        message.channel.sendMessage("Access denied.");
-      }
-    }
-    */
     // Restarts the bot
     if (command == "restart") {
 
@@ -94,38 +78,41 @@ bot.on("message", function (message) {
     */
     }
 
-    // Looks up and returns all known usernames and nicknames for the given user
+    // Looks up and displays all known usernames and nicknames for the given user
     else if (command == "names") {
       var startTime = Date.now();
       var userId;
-      var userByDisplayName = message.guild.members.find(function (member) { return member.displayName.toUpperCase() == params[0].toUpperCase(); });
 
       var error = 0;
       // no parameters
-      if (params.length < 1) {
+      if (!params) {
         error = 1;
         userId = false;
-      }
-      // if user is mentioned
-      else if (mentions.users.array().length > 0) {
-        userId = mentions.users.array()[0].id;
-        //message.channel.sendMessage("User " + mentions.users.array()[0].username + " found on this server.");
-      }
-      // if parameter is a user id
-      else if (message.guild.members.has(params[0])) {
-        userId = params[0];
-        //message.channel.sendMessage("User id " + message.guild.members.get(userId) + " found on this server.");
-      }
-      // if parameter is a user displayname
-      else if (userByDisplayName) {
-        userId = userByDisplayName.id;
-        //message.channel.sendMessage("User " + userByDisplayName.displayName + " found on this server.");
-      }
-      // no user found
+      } 
       else {
-        error = 2;
-        userId = false;
+        var userByDisplayName = message.guild.members.find(function (member) { return member.displayName.toUpperCase() == params[0].toUpperCase(); });
+        // if user is mentioned
+        if (mentions.users.array().length > 0) {
+          userId = mentions.users.array()[0].id;
+          //message.channel.sendMessage("User " + mentions.users.array()[0].username + " found on this server.");
+        }
+        // if parameter is a user id
+        else if (message.guild.members.has(params[0])) {
+          userId = params[0];
+          //message.channel.sendMessage("User id " + message.guild.members.get(userId) + " found on this server.");
+        }
+        // if parameter is a user displayname
+        else if (userByDisplayName) {
+          userId = userByDisplayName.id;
+          //message.channel.sendMessage("User " + userByDisplayName.displayName + " found on this server.");
+        }
+        // no user found
+        else {
+          error = 2;
+          userId = false;
+        }
       }
+      
 
       if (userId) {
         var usernames = Stats.getUsernames(userId);
@@ -163,7 +150,7 @@ bot.on("message", function (message) {
         var embed = new Discord.RichEmbed()
           .setAuthor(member.displayName, member.user.avatarURL)
           .setColor(member.highestRole.color)
-          .setFooter("Lookup took " + completionTime + " seconds.")
+          .setFooter("Time to complete: " + completionTime + " seconds.")
           .addField("Usernames", uString, true)
           .addField("Nicknames", nString, true);
 
@@ -183,7 +170,6 @@ bot.on("message", function (message) {
       }
       // Error ocurred
       else {
-        var completionTime = (Date.now() - startTime) / 1000.0;
         var errorString;
         if (error) {
           if (error == 1) { errorString = "Incorrect parameters, please include a user id, a displayname of a user, or a user mention."; }
@@ -191,85 +177,57 @@ bot.on("message", function (message) {
         }
         else { errorString = "An unknown error has ocurred";}
 
-        var embed = new Discord.RichEmbed()
-          .setColor(errorColor)
-          .addField("Error", errorString)
-          .setFooter("Lookup took " + completionTime + " seconds.");
-
-        message.channel.sendEmbed(
-          embed,
-          '',
-          { disableEveryone: true }
-        )
-        .then(function (output) {
-          //console.log(output);
-        })
-        .catch(function (err) {
-          console.log("Error during \"" + command + "\" command with params:");
-          console.log(params);
-          console.log(err.response.statusCode + ": " + err.response.res.statusMessage + ", " + err.response.res.text);
-        });
+        errorResponse(message.channel, errorString, (Date.now() - startTime) / 1000.0);
       }     
     }
-    // Finds all users that have used the given displayname
+    // Finds and displays all users that have used the given displayname
     else if (command == "users") {
       var startTime = Date.now();
-      var foundUsers = Stats.getUsersByName(params[0], message.guild);
+      if (params) {
+        var data = Stats.getUsersByName(params[0], message.guild);
 
-      if (foundUsers) {
-        var nString = "";
-        var iString = "";
-        for (var memberKey in foundUsers) {
-          member = foundUsers[memberKey];
-          nString += member.displayName + "\n";
-          iString += memberKey + "\n";
+        if (!data.error.code) {
+          var nString = "";
+          var iString = "";
+          for (var memberKey in data.foundUsers) {
+            member = data.foundUsers[memberKey];
+            nString += member.displayName + "\n";
+            iString += memberKey + "\n";
+          }
+          var completionTime = (Date.now() - startTime) / 1000.0;
+
+          var embed = new Discord.RichEmbed()
+          .setColor(defaultColor)
+          .setFooter("Time to complete: " + completionTime + " seconds.")
+          .setTitle("Result")
+          .setDescription("All users that have used the name **" + params[0] + "** at any point.")
+          .addField("Current name", nString, true)
+          .addField("ID", iString, true);
+
+          message.channel.sendEmbed(
+            embed,
+            '',
+            { disableEveryone: true }
+          )
+          .then(function (output) {
+            //console.log(output);
+          })
+          .catch(function (err) {
+            console.log("Error during \"" + command + "\" command with params:");
+            console.log(params);
+            console.log(err.response.statusCode + ": " + err.response.res.statusMessage + ", " + err.response.res.text);
+          }); 
         }
-        var completionTime = (Date.now() - startTime) / 1000.0;
-
-        var embed = new Discord.RichEmbed()
-        .setColor(defaultColor)
-        .setFooter("Lookup took " + completionTime + " seconds.")
-        .setTitle("Found users:")
-        .addField("Current name", nString, true)
-        .addField("ID", iString, true);
-
-        message.channel.sendEmbed(
-          embed,
-          '',
-          { disableEveryone: true }
-        )
-        .then(function (output) {
-          //console.log(output);
-        })
-        .catch(function (err) {
-          console.log("Error during \"" + command + "\" command with params:");
-          console.log(params);
-          console.log(err.response.statusCode + ": " + err.response.res.statusMessage + ", " + err.response.res.text);
-        }); 
+        // Error ocurred
+        else {
+          if (data.error.message.length > 0) { var errorString = data.error.message; }
+          else { var errorString = "An unknown error has ocurred."; }
+          errorResponse(message.channel, errorString, (Date.now() - startTime) / 1000.0);
+        }
       }
-      // Error ocurred
+      // Error: no parameters
       else {
-        var completionTime = (Date.now() - startTime) / 1000.0;
-        var errorString = "An unknown error has ocurred";
-
-        var embed = new Discord.RichEmbed()
-        .setColor(errorColor)
-        .addField("Error", errorString)
-        .setFooter("Lookup took " + completionTime + " seconds.");
-
-        message.channel.sendEmbed(
-          embed,
-          '',
-          { disableEveryone: true }
-        )
-        .then(function (output) {
-          //console.log(output);
-        })
-        .catch(function (err) {
-          console.log("Error during \"" + command + "\" command with params:");
-          console.log(params);
-          console.log(err.response.statusCode + ": " + err.response.res.statusMessage + ", " + err.response.res.text);
-        });
+        errorResponse(message.channel, "Incorrect parameters, please include a name.", (Date.now() - startTime) / 1000.0);
       }
     }
   }
@@ -313,9 +271,22 @@ bot.on("guildUpdate", function (oldGuild, newGuild) {
   Stats.guildUpdate(oldGuild, newGuild);
 });
 
-/*  not necessary atm
-function hasPermission(message) {
-  if (message.author.id == message.guild.owner.id || author has admin permission node || author has one dev role) {
+function errorResponse (channel, message, completionTime) {
+  var embed = new Discord.RichEmbed()
+  .setColor(errorColor)
+  .addField("Error", message)
+  .setFooter("Time to complete: " + completionTime + " seconds.");
 
-  }
-}*/
+  channel.sendEmbed(
+    embed,
+    "",
+    { disableEveryone: true }
+  )
+  .then(function (output) {
+    //console.log(output);
+  })
+  .catch(function (err) {
+    console.log("Error: ");
+    console.log(err.response.statusCode + ": " + err.response.res.statusMessage + ", " + err.response.res.text);
+  });
+}
