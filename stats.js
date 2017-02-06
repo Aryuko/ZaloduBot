@@ -150,6 +150,41 @@ var self = module.exports = {
     }
   },
 
+  getUsersByName: function (name, guild) {
+    if (stats.guilds.hasOwnProperty(guild.id)) {
+      var statsMembers = stats.guilds[guild.id].members;
+
+      var foundUsers = {};
+
+      // Check through stats for members on the guild
+      for (var memberKey in statsMembers) {
+        // Check through all saved nicknames for the member
+        for (var nickname in statsMembers[memberKey].nicknames) {
+          if (nickname == name) {
+            foundUsers[memberKey] = statsMembers[memberKey];
+            break;
+          }
+        }
+        // Check through all saved usernames for the user, if there exists a record for the user
+        if (stats.users.hasOwnProperty(memberKey)) {
+          for (var username in stats.users[memberKey].usernames) {
+            if (username == name && !foundUsers.hasOwnProperty(memberKey)) {
+              foundUsers[memberKey] = statsMembers[memberKey];
+              break;
+            }
+          }
+        }
+      }
+      if (Object.keys(foundUsers).length > 0) { return foundUsers; }
+      else { return false; }
+    }
+    else {
+      // Error: no guild info saved
+      return false;
+    }
+  },
+
+  /* Events: */
   channelCreate: function (channel) {
     if (stats.guilds.hasOwnProperty(channel.guild.id)) {
       console.log("New channel \"" + channel.name + "\" created");

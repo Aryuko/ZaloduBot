@@ -1,5 +1,6 @@
 var Stats = require("./stats.js");
 var fs = require("fs");
+var defaultColor = "#738BD7"; //TODO: move this to config
 var errorColor = "#f74f25"; //TODO: this one too
 
 var serverconfigFilePath = "./serverconfig.json";
@@ -157,12 +158,12 @@ bot.on("message", function (message) {
         }
 
         var member = message.guild.members.get(userId);
-        var finalTime = (Date.now() - startTime) / 1000.0;
+        var completionTime = (Date.now() - startTime) / 1000.0;
 
         var embed = new Discord.RichEmbed()
           .setAuthor(member.displayName, member.user.avatarURL)
           .setColor(member.highestRole.color)
-          .setFooter("Lookup took " + finalTime + " seconds.")
+          .setFooter("Lookup took " + completionTime + " seconds.")
           .addField("Usernames", uString, true)
           .addField("Nicknames", nString, true);
 
@@ -182,7 +183,7 @@ bot.on("message", function (message) {
       }
       // Error ocurred
       else {
-        var finalTime = (Date.now() - startTime) / 1000.0;
+        var completionTime = (Date.now() - startTime) / 1000.0;
         var errorString;
         if (error) {
           if (error == 1) { errorString = "Incorrect parameters, please include a user id, a displayname of a user, or a user mention."; }
@@ -193,18 +194,83 @@ bot.on("message", function (message) {
         var embed = new Discord.RichEmbed()
           .setColor(errorColor)
           .addField("Error", errorString)
-          .setFooter("Lookup took " + finalTime + " seconds.");
+          .setFooter("Lookup took " + completionTime + " seconds.");
 
         message.channel.sendEmbed(
           embed,
           '',
           { disableEveryone: true }
-        );
+        )
+        .then(function (output) {
+          //console.log(output);
+        })
+        .catch(function (err) {
+          console.log("Error during \"" + command + "\" command with params:");
+          console.log(params);
+          console.log(err.response.statusCode + ": " + err.response.res.statusMessage + ", " + err.response.res.text);
+        });
       }     
     }
     // Finds all users that have used the given displayname
-    else if (command == "") {
+    else if (command == "users") {
+      var startTime = Date.now();
+      var foundUsers = Stats.getUsersByName(params[0], message.guild);
 
+      if (foundUsers) {
+        var nString = "";
+        var iString = "";
+        for (var memberKey in foundUsers) {
+          member = foundUsers[memberKey];
+          nString += member.displayName + "\n";
+          iString += memberKey + "\n";
+        }
+        var completionTime = (Date.now() - startTime) / 1000.0;
+
+        var embed = new Discord.RichEmbed()
+        .setColor(defaultColor)
+        .setFooter("Lookup took " + completionTime + " seconds.")
+        .setTitle("Found users:")
+        .addField("Current name", nString, true)
+        .addField("ID", iString, true);
+
+        message.channel.sendEmbed(
+          embed,
+          '',
+          { disableEveryone: true }
+        )
+        .then(function (output) {
+          //console.log(output);
+        })
+        .catch(function (err) {
+          console.log("Error during \"" + command + "\" command with params:");
+          console.log(params);
+          console.log(err.response.statusCode + ": " + err.response.res.statusMessage + ", " + err.response.res.text);
+        }); 
+      }
+      // Error ocurred
+      else {
+        var completionTime = (Date.now() - startTime) / 1000.0;
+        var errorString = "An unknown error has ocurred";
+
+        var embed = new Discord.RichEmbed()
+        .setColor(errorColor)
+        .addField("Error", errorString)
+        .setFooter("Lookup took " + completionTime + " seconds.");
+
+        message.channel.sendEmbed(
+          embed,
+          '',
+          { disableEveryone: true }
+        )
+        .then(function (output) {
+          //console.log(output);
+        })
+        .catch(function (err) {
+          console.log("Error during \"" + command + "\" command with params:");
+          console.log(params);
+          console.log(err.response.statusCode + ": " + err.response.res.statusMessage + ", " + err.response.res.text);
+        });
+      }
     }
   }
   /* let's focus on config for now
