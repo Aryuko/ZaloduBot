@@ -4,9 +4,10 @@ A discord bot for tracking usernames, nicknames, and stats, with more features p
 ## Installation 
 
 ### Essential
-1. Clone the repo: ``git clone https://github.com/Zalodu/ZaloduBot``.
-2. Install dependencies using npm: ``npm install discord.js``.
-3. Create a ``auth.json`` file or rename the ``auth.json.example`` file. Fill in your client ID and bot token, found [here](https://discordapp.com/developers/applications/me).
+1. Install [Node.js](https://nodejs.org/en/download/).
+2. Clone the repo: ``git clone https://github.com/Zalodu/ZaloduBot``.
+3. Install dependencies using npm: ``npm install discord.js``.
+4. Create a ``auth.json`` file or rename the ``auth.json.example`` file. Fill in your client ID and bot token, found [here](https://discordapp.com/developers/applications/me).
 
 ### Optional:
 1. Install the optional dependencies:
