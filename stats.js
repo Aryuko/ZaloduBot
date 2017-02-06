@@ -253,5 +253,19 @@ var self = module.exports = {
     var info = self.indexGuild(guild);
     console.log("Joined a new guild \"" + guild.name + "\", indexed " + info.numUsers + " users.")
     self.saveStats();
+  },
+
+  guildUpdate: function (oldGuild, newGuild) {
+    // Only proceed if there's a record of the guild
+    if (oldGuild.name != newGuild.name) {
+      if (stats.guilds.hasOwnProperty(oldGuild.id)) {
+        var statsGuild = stats.guilds[oldGuild.id];
+
+        statsGuild.name = newGuild.name;
+        console.log("Guild \"" + oldGuild.id + "\" renamed from \"" + oldGuild.name + "\" to \"" + newGuild.name + "\"");
+
+        self.saveStats();
+      }
+    }
   }
 };

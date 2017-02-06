@@ -241,7 +241,11 @@ bot.on("guildMemberAdd", function (member) {
 
 bot.on("guildCreate", function (guild) {
   Stats.guildCreate(guild);
-})
+});
+
+bot.on("guildUpdate", function (oldGuild, newGuild) {
+  Stats.guildUpdate(oldGuild, newGuild);
+});
 
 /*  not necessary atm
 function hasPermission(message) {
