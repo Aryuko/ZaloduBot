@@ -1,0 +1,13 @@
+{
+  "authentication": {
+    "bot_token": "Mjc4Mjk3NTQyMjAxMDQ5MDg4.C3qQ4w.Y9l6tenBG2E-uu8SFY5Bu3TSw38",
+    "client_id": "278297542201049088"
+  },
+  "embeds": {
+    "defaultColor": "#738BD7",
+    "errorColor": "#f74f25" 
+  },
+  "user": {
+    "status": "invisible"
+  }
+}

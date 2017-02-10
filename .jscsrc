@@ -1,7 +1,7 @@
 {
     "requireCurlyBraces" : true,
     "disallowMultipleSpaces" : true,
-    "validateIndentation" : 2,
+    "validateIndentation" : 4,
     "requireCapitalizedConstructors" : true,
     "requireSemicolons" : true,
     "requireSpaceAfterKeywords" : true,
