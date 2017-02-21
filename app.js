@@ -1,43 +1,77 @@
 const Discord = require("discord.js");
 const config = require("./config.json");
-const Stats = require("./stats.js");
+const Stats = require("./stats.js"); //get rid of
+const loadFunctions = require("./functions/loadFunctions.js");
 const fs = require("fs");
 const serverconfigFilePath = "./serverconfig.json";
 
-let Serverconfig;
+let Serverconfig = {};
 try {
     Serverconfig = require(serverconfigFilePath);
 } catch (e) {
     /* Create empty serverconfig file if there's no serverconfig file */
-    Serverconfig = {};
     fs.writeFile(serverconfigFilePath, JSON.stringify(stats, null, 2), function (err) {
         if (err) { return console.log(err); }
     });
 }
 
 console.log("Starting ZaloduBot...");
-console.log("Authenticating...");
 
 let startTime = Date.now(); //use client.uptime instead??
 let client = new Discord.Client();
 
-console.log("Logging in...");
+// Extend client
+client.clientDirectory = process.cwd();
+client.functions = {};
+client.commands = {};
+
+// Extend client with Discord.js methods for use in modules
+client.methods = {};
+client.methods.RichEmbed = Discord.RichEmbed;
+
+console.log("Loading functions...");
+loadFunctions(client).then(() => {
+
+});
+
+console.log("Loading modules...");
+// stuff
+
+console.log("Authenticating...");
 client.login(config.authentication.bot_token);
 
-
-client.once("ready", function () {
+client.once("ready", () => {
     let guildsArray = client.guilds.array();
-    console.log("Bot is live! Serving " + guildsArray.length + " servers.");
-
     client.user.setStatus(config.user.status);
+    console.log("Bot is live! Serving " + guildsArray.length + " servers.");
 
     Stats.initStats(guildsArray);
 });
 
-client.on("disconnected", function () {
+client.on("disconnected", () => {
     console.log("Bot disconnected");
     process.exit(1); //exits node.js with an error
 });
+
+function errorResponse (channel, message, completionTime) {
+    let embed = new Discord.RichEmbed()
+    .setColor(errorColor)
+    .addField("Error", message)
+    .setFooter("Time to complete: " + completionTime + " seconds.");
+
+    channel.sendEmbed(
+      embed,
+      "",
+      { disableEveryone: true }
+    )
+    .then((output) => {
+        //console.log(output);
+    })
+    .catch((err) => {
+        console.log("Error: ");
+        console.log(err.response.statusCode + ": " + err.response.res.statusMessage + ", " + err.response.res.text);
+    });
+}
 
 /* BUNCH OF EVENTS */
 
@@ -78,7 +112,7 @@ client.on("message", function (message) {
                 userId = false;
             } 
             else {
-                let userByDisplayName = message.guild.members.find(function (member) { return member.displayName.toUpperCase() == params[0].toUpperCase(); });
+                let userByDisplayName = message.guild.members.find((member) => { return member.displayName.toUpperCase() == params[0].toUpperCase(); });
                 // if user is mentioned
                 if (mentions.users.array().length > 0) {
                     userId = mentions.users.array()[0].id;
@@ -147,10 +181,10 @@ client.on("message", function (message) {
                   '',
                   { disableEveryone: true }
                 )
-                .then(function (output) {
+                .then((output) => {
                     //console.log(output);
                 })
-                .catch(function (err) {
+                .catch((err) => {
                     console.log("Error during \"" + command + "\" command with params:");
                     console.log(params);
                     console.log(err.response.statusCode + ": " + err.response.res.statusMessage + ", " + err.response.res.text);
@@ -197,10 +231,10 @@ client.on("message", function (message) {
                       '',
                       { disableEveryone: true }
                     )
-                    .then(function (output) {
+                    .then((output) => {
                         //console.log(output);
                     })
-                    .catch(function (err) {
+                    .catch((err) => {
                         console.log("Error during \"" + command + "\" command with params:");
                         console.log(params);
                         console.log(err.response.statusCode + ": " + err.response.res.statusMessage + ", " + err.response.res.text);
@@ -226,55 +260,35 @@ client.on("message", function (message) {
     */
 });
 
-client.on("channelCreate", function (channel) {
+client.on("channelCreate", (channel) => {
     if (channel.type == "text") {
         Stats.channelCreate(channel); 
     }
 });
 
-client.on("channelUpdate", function (oldChannel, newChannel) {
+client.on("channelUpdate", (oldChannel, newChannel) => {
     if (oldChannel.type == "text") {
         Stats.channelUpdate(oldChannel, newChannel);
     }
 });
 
 
-client.on("guildMemberUpdate", function (oldMember, newMember) {
+client.on("guildMemberUpdate", (oldMember, newMember) => {
     Stats.guildMemberUpdate(oldMember, newMember);
 });
 
-client.on("userUpdate", function (oldUser, newUser) {
+client.on("userUpdate", (oldUser, newUser) => {
     Stats.userUpdate(oldUser, newUser);
 });
 
-client.on("guildMemberAdd", function (member) {
+client.on("guildMemberAdd", (member) => {
     Stats.guildMemberAdd(member);
 });
 
-client.on("guildCreate", function (guild) {
+client.on("guildCreate", (guild) => {
     Stats.guildCreate(guild);
 });
 
-client.on("guildUpdate", function (oldGuild, newGuild) {
+client.on("guildUpdate", (oldGuild, newGuild) => {
     Stats.guildUpdate(oldGuild, newGuild);
 });
-
-function errorResponse (channel, message, completionTime) {
-    let embed = new Discord.RichEmbed()
-    .setColor(errorColor)
-    .addField("Error", message)
-    .setFooter("Time to complete: " + completionTime + " seconds.");
-
-    channel.sendEmbed(
-      embed,
-      "",
-      { disableEveryone: true }
-    )
-    .then(function (output) {
-        //console.log(output);
-    })
-    .catch(function (err) {
-        console.log("Error: ");
-        console.log(err.response.statusCode + ": " + err.response.res.statusMessage + ", " + err.response.res.text);
-    });
-}
