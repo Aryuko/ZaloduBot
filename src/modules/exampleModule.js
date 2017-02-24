@@ -5,7 +5,7 @@ module.exports = {
     "commands": {
         "hi": {
             "run": () => {
-                console.log("Hi!");
+                console.log("Hi!!!!!");
             },
             "config": {
                 enabled: true,

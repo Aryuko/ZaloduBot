@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "author": "Zalodu",
   "description": "discord.js bot",
-  "main": "app.js",
+  "main": "./src/app.js",
   "scripts": {
-    "start": "node app.js",
+    "start": "node ./src/app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "nodemon --delay 1"
+    "watch": "nodemon --delay 1 --watch ./src"
   },
   "repository": {
     "type": "git",

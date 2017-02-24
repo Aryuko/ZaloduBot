@@ -1,18 +1,8 @@
 const Discord = require("discord.js");
-const config = require("./config.json");
+const config = require("../config.js");
 const Stats = require("./stats.js"); //get rid of
 const fs = require("fs");
 const serverconfigFilePath = "./serverconfig.json";
-
-let Serverconfig = {};
-try {
-    Serverconfig = require(serverconfigFilePath);
-} catch (e) {
-    /* Create empty serverconfig file if there's no serverconfig file */
-    fs.writeFile(serverconfigFilePath, JSON.stringify(stats, null, 2), function (err) {
-        if (err) { return console.log(err); }
-    });
-}
 
 console.log("Starting ZaloduBot...");
 
@@ -37,7 +27,7 @@ loadFunctions(client).then(() => {
 
 console.log("Loading modules...");
 const loadFiles = require("./functions/loadFiles.js");
-loadFiles("./modules").then((requires) => {
+loadFiles("./src/modules").then((requires) => {
     //init stuff
     client.modules = requires;
     client.modules.exampleModule.commands.hi.run();

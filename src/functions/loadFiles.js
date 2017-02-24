@@ -9,6 +9,7 @@ module.exports = (dir) => new Promise((resolve, reject) => {
 });
 
 const loadFiles = (dir) => new Promise((resolve, reject) => {
+    dir = path.resolve(dir);
     fs.ensureDirAsync(dir)
     .then(() => {
         fs.readdirAsync(dir)
