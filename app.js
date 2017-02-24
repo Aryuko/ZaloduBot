@@ -36,7 +36,11 @@ loadFunctions(client).then(() => {
 });
 
 console.log("Loading modules...");
-// stuff
+const loadModules = require("./functions/loadModules.js");
+loadModules(client).then(() => {
+    //init stuff
+    client.modules.exampleModule.commands.hi.run();
+});
 
 console.log("Authenticating...");
 client.login(config.authentication.bot_token);

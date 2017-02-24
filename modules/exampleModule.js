@@ -3,8 +3,15 @@ module.exports = {
         "enabled": true
     },
     "commands": {
-        "hi": () => {
-            console.log("Hi!");
+        "hi": {
+            "run": () => {
+                console.log("Hi!");
+            },
+            "config": {
+                enabled: true,
+                guildOnly: true,
+                aliases: []
+            }
         }
     },
     "events": {
