@@ -24,6 +24,7 @@ let client = new Discord.Client();
 client.clientDirectory = process.cwd();
 client.functions = {};
 client.commands = {};
+client.modules = {};
 
 // Extend client with Discord.js methods for use in modules
 client.methods = {};
@@ -55,7 +56,7 @@ client.on("disconnected", () => {
 
 function errorResponse (channel, message, completionTime) {
     let embed = new Discord.RichEmbed()
-    .setColor(errorColor)
+    .setColor(config.embeds.errorColor)
     .addField("Error", message)
     .setFooter("Time to complete: " + completionTime + " seconds.");
 
@@ -219,7 +220,7 @@ client.on("message", function (message) {
                     let completionTime = (Date.now() - startTime) / 1000.0;
 
                     let embed = new Discord.RichEmbed()
-                    .setColor(defaultColor)
+                    .setColor(config.embeds.defaultColor)
                     .setFooter("Time to complete: " + completionTime + " seconds.")
                     .setTitle("Result")
                     .setDescription("All users that have been seen using the name **" + params[0] + "**:")
@@ -242,8 +243,8 @@ client.on("message", function (message) {
                 }
                 // Error ocurred
                 else {
-                    if (data.error.message.length > 0) { let errorString = data.error.message; }
-                    else { let errorString = "An unknown error has ocurred."; }
+                    if (data.error.message.length > 0) { var errorString = data.error.message; }
+                    else { var errorString = "An unknown error has ocurred."; }
                     errorResponse(message.channel, errorString, (Date.now() - startTime) / 1000.0);
                 }
             }

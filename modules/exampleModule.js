@@ -3,7 +3,9 @@ module.exports = {
         "enabled": true
     },
     "commands": {
-
+        "hi": () => {
+            console.log("Hi!");
+        }
     },
     "events": {
 
