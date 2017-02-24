@@ -1,7 +1,7 @@
 {
   "authentication": {
-    "bot_token": "Mjc4Mjk3NTQyMjAxMDQ5MDg4.C3qQ4w.Y9l6tenBG2E-uu8SFY5Bu3TSw38",
-    "client_id": "278297542201049088"
+    "bot_token": "insert token here",
+    "client_id": "insert client id here"
   },
   "embeds": {
     "defaultColor": "#738BD7",
