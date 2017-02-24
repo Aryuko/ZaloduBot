@@ -1,7 +1,6 @@
 const Discord = require("discord.js");
 const config = require("./config.json");
 const Stats = require("./stats.js"); //get rid of
-const loadFunctions = require("./functions/loadFunctions.js");
 const fs = require("fs");
 const serverconfigFilePath = "./serverconfig.json";
 
@@ -23,22 +22,24 @@ let client = new Discord.Client();
 // Extend client
 client.clientDirectory = process.cwd();
 client.functions = {};
-client.commands = {};
 client.modules = {};
 
 // Extend client with Discord.js methods for use in modules
 client.methods = {};
 client.methods.RichEmbed = Discord.RichEmbed;
 
+/*
 console.log("Loading functions...");
 loadFunctions(client).then(() => {
 
 });
+*/
 
 console.log("Loading modules...");
-const loadModules = require("./functions/loadModules.js");
-loadModules(client).then(() => {
+const loadFiles = require("./functions/loadFiles.js");
+loadFiles("./modules").then((requires) => {
     //init stuff
+    client.modules = requires;
     client.modules.exampleModule.commands.hi.run();
 });
 
@@ -73,8 +74,7 @@ function errorResponse (channel, message, completionTime) {
         //console.log(output);
     })
     .catch((err) => {
-        console.log("Error: ");
-        console.log(err.response.statusCode + ": " + err.response.res.statusMessage + ", " + err.response.res.text);
+        console.error(err.response.statusCode + ": " + err.response.res.statusMessage + ", " + err.response.res.text);
     });
 }
 
