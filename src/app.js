@@ -26,24 +26,23 @@ loadFiles("./src/functions").then((result) => {
     if (client.functions.hasOwnProperty("exampleFunction")) {
         client.functions.exampleFunction();
     }
-});
 
+    console.log("Loading modules...");
+    loadFiles("./src/modules").then((result) => {
+        client.modules = result.requires;
+        console.log("Finished loading " + result.count + " modules.");
 
-console.log("Loading modules...");
-loadFiles("./src/modules").then((result) => {
-    client.modules = result.requires;
-    console.log("Finished loading " + result.count + " modules.");
-
-    // init event stuff
-    if (client.modules.hasOwnProperty("exampleModule")) {
-        if (client.modules.exampleModule.config.enabled) {
-            client.modules.exampleModule.commands.hi.run();
+        // init event stuff
+        if (client.modules.hasOwnProperty("exampleModule")) {
+            if (client.modules.exampleModule.config.enabled) {
+                client.modules.exampleModule.commands.hi.run();
+            }
         }
-    }
-});
+    });
 
-console.log("Authenticating...");
-client.login(config.authentication.bot_token);
+    console.log("Authenticating...");
+    client.login(config.authentication.bot_token);
+});
 
 client.once("ready", () => {
     let guildsArray = client.guilds.array();
