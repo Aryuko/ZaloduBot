@@ -2,7 +2,7 @@ const Discord = require("discord.js");
 const config = require("../config.js");
 const Stats = require("./stats.js"); //get rid of
 const fs = require("fs");
-const serverconfigFilePath = "./serverconfig.json";
+const loadFiles = require("./functions/loadFiles.js");
 
 console.log("Starting ZaloduBot...");
 
@@ -18,19 +18,28 @@ client.modules = {};
 client.methods = {};
 client.methods.RichEmbed = Discord.RichEmbed;
 
-/*
-console.log("Loading functions...");
-loadFunctions(client).then(() => {
 
+console.log("Loading functions...");
+loadFiles("./src/functions").then((result) => {
+    client.functions = result.requires;
+    console.log("Finished loading " + result.count + " functions.");
+    if (client.functions.hasOwnProperty("exampleFunction")) {
+        client.functions.exampleFunction();
+    }
 });
-*/
+
 
 console.log("Loading modules...");
-const loadFiles = require("./functions/loadFiles.js");
-loadFiles("./src/modules").then((requires) => {
-    //init stuff
-    client.modules = requires;
-    client.modules.exampleModule.commands.hi.run();
+loadFiles("./src/modules").then((result) => {
+    client.modules = result.requires;
+    console.log("Finished loading " + result.count + " modules.");
+
+    // init event stuff
+    if (client.modules.hasOwnProperty("exampleModule")) {
+        if (client.modules.exampleModule.config.enabled) {
+            client.modules.exampleModule.commands.hi.run();
+        }
+    }
 });
 
 console.log("Authenticating...");

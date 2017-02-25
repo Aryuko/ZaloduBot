@@ -1,14 +1,10 @@
 const fs = require("fs-extra-promise");
 const path = require("path");
 
+//returns a result containing:
+//requires: an array of files loaded
+//count: number of files loaded
 module.exports = (dir) => new Promise((resolve, reject) => {
-    loadFiles(dir).then((result) => {
-        console.log("Finished loading " + result.count + " modules.");
-        resolve(result.requires);
-    }).catch(reject);
-});
-
-const loadFiles = (dir) => new Promise((resolve, reject) => {
     dir = path.resolve(dir);
     fs.ensureDirAsync(dir)
     .then(() => {
