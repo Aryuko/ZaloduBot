@@ -1,5 +1,4 @@
 const Discord = require("discord.js");
-const config = require("../config.js");
 const Stats = require("./stats.js"); //get rid of
 const fs = require("fs");
 const loadFiles = require("./functions/loadFiles.js");
@@ -10,7 +9,7 @@ let startTime = Date.now(); //use client.uptime instead??
 let client = new Discord.Client();
 
 // Extend client
-client.clientDirectory = process.cwd();
+client.config = require("../config.js");
 client.functions = {};
 client.modules = {};
 
@@ -41,12 +40,12 @@ loadFiles("./src/functions").then((result) => {
     });
 
     console.log("Authenticating...");
-    client.login(config.authentication.bot_token);
+    client.login(client.config.authentication.bot_token);
 });
 
 client.once("ready", () => {
     let guildsArray = client.guilds.array();
-    client.user.setStatus(config.user.status);
+    client.user.setStatus(client.config.user.status);
     console.log("Bot is live! Serving " + guildsArray.length + " servers.");
 
     Stats.initStats(guildsArray);
@@ -56,25 +55,6 @@ client.on("disconnected", () => {
     console.log("Bot disconnected");
     process.exit(1); //exits node.js with an error
 });
-
-function errorResponse (channel, message, completionTime) {
-    let embed = new Discord.RichEmbed()
-    .setColor(config.embeds.errorColor)
-    .addField("Error", message)
-    .setFooter("Time to complete: " + completionTime + " seconds.");
-
-    channel.sendEmbed(
-      embed,
-      "",
-      { disableEveryone: true }
-    )
-    .then((output) => {
-        //console.log(output);
-    })
-    .catch((err) => {
-        console.error(err.response.statusCode + ": " + err.response.res.statusMessage + ", " + err.response.res.text);
-    });
-}
 
 /* BUNCH OF EVENTS */
 
@@ -202,7 +182,7 @@ client.on("message", function (message) {
                 }
                 else { errorString = "An unknown error has ocurred";}
 
-                errorResponse(message.channel, errorString, (Date.now() - startTime) / 1000.0);
+                client.functions.errorResponse(client, message.channel, errorString, (Date.now() - startTime) / 1000.0);
             }     
         }
         // Finds and displays all users that have been seen using the given name
@@ -222,7 +202,7 @@ client.on("message", function (message) {
                     let completionTime = (Date.now() - startTime) / 1000.0;
 
                     let embed = new Discord.RichEmbed()
-                    .setColor(config.embeds.defaultColor)
+                    .setColor(client.config.embeds.defaultColor)
                     .setFooter("Time to complete: " + completionTime + " seconds.")
                     .setTitle("Result")
                     .setDescription("All users that have been seen using the name **" + params[0] + "**:")
@@ -241,18 +221,18 @@ client.on("message", function (message) {
                         console.log("Error during \"" + command + "\" command with params:");
                         console.log(params);
                         console.log(err.response.statusCode + ": " + err.response.res.statusMessage + ", " + err.response.res.text);
-                    }); 
+                    });
                 }
                 // Error ocurred
                 else {
                     if (data.error.message.length > 0) { var errorString = data.error.message; }
                     else { var errorString = "An unknown error has ocurred."; }
-                    errorResponse(message.channel, errorString, (Date.now() - startTime) / 1000.0);
+                    client.functions.errorResponse(client, message.channel, errorString, (Date.now() - startTime) / 1000.0);
                 }
             }
             // Error: no parameters
             else {
-                errorResponse(message.channel, "Incorrect parameters, please include a name.", (Date.now() - startTime) / 1000.0);
+                client.functions.errorResponse(client, message.channel, "Incorrect parameters, please include a name.", (Date.now() - startTime) / 1000.0);
             }
         }
     }
